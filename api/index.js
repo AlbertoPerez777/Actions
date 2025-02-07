@@ -1,6 +1,6 @@
 const express = require('express');
 const _ = require('underscore');
-const cors = require('cors');
+const cors = require('cors');  // Asegúrate de incluir cors
 
 const port = process.env.PORT || 3000;
 const animals = {
@@ -19,6 +19,8 @@ function getAnimal() {
 }
 
 const app = express();
+
+// Usamos CORS
 app.use(cors());
 
 app.get('/', async (req, res, next) => {
@@ -53,19 +55,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-const server = app.listen(port, () => {
-  console.log(`Launching server on http://localhost:${port}`);
-});
-
-// Manejo de cierre del servidor
-process.on('SIGTERM', () => {
-  server.close(() => {
-    console.log('Process terminated');
+// Solo iniciamos el servidor si este archivo se ejecuta directamente
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Launching server on http://localhost:${port}`);
   });
-});
+}
 
-process.on('SIGINT', () => {
-  server.close(() => {
-    console.log('Process terminated');
-  });
-});
+module.exports = app;  // Exportamos la app para usarla en los tests
+
