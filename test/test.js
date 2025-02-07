@@ -1,6 +1,7 @@
 const express = require('express');
 const _ = require('underscore');
- 
+const cors = require('cors');
+
 const port = process.env.PORT || 3000;
 const animals = {
     "cat": "meow",
@@ -11,15 +12,15 @@ const animals = {
     "lion": "roar",
     "bird": "tweet",
     "burro": "AAAAAA"
-
 };
- 
+
 function getAnimal() {
   return _.sample(Object.entries(animals));
 }
- 
+
 const app = express();
- 
+app.use(cors());
+
 app.get('/', async (req, res, next) => {
   try {
     const [animal_name, sound] = getAnimal();
@@ -37,7 +38,7 @@ app.get('/', async (req, res, next) => {
     next(error);
   }
 });
- 
+
 app.get('/api', async (req, res, next) => {
   try {
     res.status(200).json(animals);
@@ -45,15 +46,17 @@ app.get('/api', async (req, res, next) => {
     next(error);
   }
 });
- 
-// Middleware para manejar errores
+
+// Middleware de manejo de errores
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something went wrong!');
+  res.status(500).json({ error: 'Internal Server Error' });
 });
- 
-const server = app.listen(port, () => {
-  console.log(`Launching server on http://localhost:${port}`);
-});
- 
-module.exports = server;
+
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Launching server on http://localhost:${port}`);
+  });
+}
+
+module.exports = app;
